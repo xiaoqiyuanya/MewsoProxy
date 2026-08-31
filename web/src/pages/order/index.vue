@@ -1,8 +1,11 @@
 <template>
   <div class="page-container">
     <div class="card">
-      <div class="table-head">
-        <h3 style="margin: 0">我的订单</h3>
+      <div class="page-title">
+        <div>
+          <h2>我的订单</h2>
+          <p class="desc">查看订单状态与历史记录</p>
+        </div>
         <t-button theme="default" variant="outline" @click="load">刷新</t-button>
       </div>
       <t-table
@@ -97,10 +100,4 @@ onMounted(load);
 </script>
 
 <style scoped>
-.table-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
 </style>

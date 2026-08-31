@@ -69,7 +69,7 @@ async function onSubmit({ validateResult }: { validateResult?: boolean }) {
   align-items: center;
   justify-content: center;
   height: 100%;
-  background: linear-gradient(135deg, #f3f4f6 0%, #eef2ff 100%);
+  background: linear-gradient(135deg, #f3f4f6 0%, #eaf4ee 100%);
 }
 .auth-card {
   width: 400px;

@@ -1,7 +1,10 @@
 <template>
   <t-layout style="height: 100%">
     <t-aside width="232px" style="border-right: 1px solid var(--td-border-level-2-color)">
-      <div class="logo">MewsoProxy</div>
+      <div class="logo">
+        <span class="logo-mark">M</span>
+        <span>MewsoProxy</span>
+      </div>
       <t-menu v-model="active" theme="light" style="border-right: none" @change="onMenuChange">
         <t-menu-item value="/dashboard">
           <template #icon><dashboard-icon /></template>
@@ -82,11 +85,24 @@ async function handleLogout() {
 .logo {
   display: flex;
   align-items: center;
+  gap: 10px;
   height: 56px;
   padding: 0 20px;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
-  color: var(--td-brand-color);
+  color: #1f2329;
+}
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--td-brand-color);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
 }
 .header {
   display: flex;

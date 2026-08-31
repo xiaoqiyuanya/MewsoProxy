@@ -1,7 +1,17 @@
 :root {
-  --page-bg: #f3f4f6;
+  --page-bg: #f5f6f8;
   --card-bg: #ffffff;
   color-scheme: light;
+
+  /* 品牌色：覆盖 TDesign 默认蓝为绿色 */
+  --td-brand-color: #18a058;
+  --td-brand-color-hover: #36ad6a;
+  --td-brand-color-active: #0c7a43;
+  --td-brand-color-focus: rgba(24, 160, 88, 0.2);
+  --td-brand-color-disabled: rgba(24, 160, 88, 0.4);
+  --td-brand-color-light: rgba(24, 160, 88, 0.1);
+  --td-brand-color-light-hover: rgba(24, 160, 88, 0.16);
+  --td-brand-color-light-active: rgba(24, 160, 88, 0.24);
 }
 
 * {
@@ -20,19 +30,41 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   background-color: var(--page-bg);
-  color: #0f1419;
+  color: #1f2329;
+  -webkit-font-smoothing: antialiased;
 }
 
 .page-container {
   padding: 24px;
+  max-width: 1080px;
+  margin: 0 auto;
 }
 
 .card {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 24px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .money {
   font-weight: 600;
+}
+
+/* 页面标题区 */
+.page-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.page-title h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.page-title .desc {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #8a919f;
 }
