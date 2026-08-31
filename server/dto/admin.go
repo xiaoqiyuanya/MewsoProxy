@@ -186,13 +186,16 @@ type AdminConfigDTO struct {
 }
 
 type AdminSystemStatusDTO struct {
-	ServerTime      int64  `json:"server_time"`
-	DBStatus        string `json:"db_status"`
-	RedisStatus     string `json:"redis_status"`
-	OnlineUserCount int64  `json:"online_user_count"`
-	UserCount       int64  `json:"user_count"`
-	OrderCount      int64  `json:"order_count"`
-	TodayPaidTotal  int64  `json:"today_paid_total"`
+	ServerTime       int64  `json:"server_time"`
+	DBStatus         string `json:"db_status"`
+	RedisStatus      string `json:"redis_status"`
+	OnlineUserCount  int64  `json:"online_user_count"`
+	UserCount        int64  `json:"user_count"`
+	OrderCount       int64  `json:"order_count"`
+	TodayPaidTotal   int64  `json:"today_paid_total"`
+	OnlineNodeCount  int64  `json:"online_node_count"`
+	ActiveUserCount  int64  `json:"active_user_count"`
+	TodayTraffic     int64  `json:"today_traffic"`
 }
 
 type AdminDropReq struct {

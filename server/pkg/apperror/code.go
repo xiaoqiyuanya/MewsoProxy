@@ -13,6 +13,9 @@ const (
 	CodeResourceNotFnd  = 40001
 	CodeOrderInvalid    = 40101
 	CodeOrderPaid       = 40102
+	CodePlanExpired     = 40103
+	CodeTrafficExhausted = 40104
+	CodePaymentInvalid  = 40105
 	CodeCouponInvalid   = 40201
 	CodeBalanceNotEnoug = 40301
 	CodeRateLimited     = 29999

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -38,6 +39,15 @@ func (h *Handler) Download(c *gin.Context) {
 	u, err := h.userSvc.GetByToken(c.Request.Context(), token)
 	if err != nil {
 		c.String(http.StatusOK, base64Error(apperror.UserMsg(err)))
+		return
+	}
+	now := time.Now().UTC().Unix()
+	if u.ExpiredAt <= 0 || u.ExpiredAt < now {
+		c.String(http.StatusOK, base64Error("订阅已过期，请续费"))
+		return
+	}
+	if u.TransferEnable > 0 && u.U+u.D >= u.TransferEnable {
+		c.String(http.StatusOK, base64Error("流量已用尽，请续费"))
 		return
 	}
 	ua := c.GetHeader("User-Agent")

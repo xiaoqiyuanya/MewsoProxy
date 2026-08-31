@@ -114,6 +114,9 @@ func (s *Service) Create(ctx context.Context, userID uint, req dto.CreateOrderRe
 	if user.InviteUserID != nil {
 		o.InviteUserID = user.InviteUserID
 	}
+	if req.PaymentID > 0 {
+		o.PaymentID = &req.PaymentID
+	}
 	err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if balanceAmount > 0 {
 			if err := tx.Model(&model.User{}).
@@ -208,6 +211,7 @@ func (s *Service) MarkPaid(ctx context.Context, orderID uint, callbackNo string)
 		if err := tx.Model(&model.User{}).Where("id = ?", o.UserID).
 			Update("expired_at", expire).
 			Update("plan_id", o.PlanID).
+			Update("transfer_enable", plan.TransferEnable).
 			Update("u", 0).
 			Update("d", 0).Error; err != nil {
 			return err

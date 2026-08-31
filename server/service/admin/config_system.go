@@ -62,6 +62,15 @@ func (s *Service) SystemStatus(ctx context.Context) (dto.AdminSystemStatusDTO, e
 		online, _ := s.rds.CountKeys(ctx, "v2board:user:token:*")
 		res.OnlineUserCount = online
 	}
+	day := todayRecordAt()
+	var onlineNodeCount, activeUserCount, todayTraffic int64
+	_ = s.db.WithContext(ctx).Model(&model.ServerNodeTelemetry{}).Where("online = ?", true).Count(&onlineNodeCount)
+	_ = s.db.WithContext(ctx).Model(&model.StatUser{}).Where("record_at = ?", day).Distinct("user_id").Count(&activeUserCount)
+	_ = s.db.WithContext(ctx).Model(&model.StatServer{}).Where("record_at = ?", day).
+		Select("COALESCE(SUM(u+d),0)").Scan(&todayTraffic)
+	res.OnlineNodeCount = onlineNodeCount
+	res.ActiveUserCount = activeUserCount
+	res.TodayTraffic = todayTraffic
 	return res, nil
 }
 
@@ -69,4 +78,9 @@ func todayStart() int64 {
 	now := time.Now().UTC()
 	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	return start.Unix()
+}
+
+func todayRecordAt() int {
+	now := time.Now().UTC()
+	return now.Year()*10000 + int(now.Month())*100 + now.Day()
 }

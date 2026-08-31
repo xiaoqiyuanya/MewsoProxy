@@ -12,15 +12,24 @@
         :loading="loading"
         :pagination="pagination"
         @page-change="onPageChange"
-      />
+      >
+        <template #op="{ row }">
+          <t-button v-if="row.status === 0" theme="primary" variant="outline" @click="goPay(row)">
+            去支付
+          </t-button>
+          <span v-else>-</span>
+        </template>
+      </t-table>
     </div>
+
+    <PayDialog v-model:visible="payVisible" :order="payOrder" @paid="onPaid" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
-import { MessagePlugin } from 'tdesign-vue-next';
 import { listOrders, OrderDTO } from '@/api/order';
+import PayDialog from '@/components/PayDialog.vue';
 
 const list = ref<OrderDTO[]>([]);
 const loading = ref(false);
@@ -30,6 +39,8 @@ const pagination = reactive({
   total: 0,
   showJumper: true,
 });
+const payVisible = ref(false);
+const payOrder = ref<OrderDTO | null>(null);
 
 const columns = [
   { colKey: 'trade_no', title: '订单号', width: 220 },
@@ -48,7 +59,17 @@ const columns = [
       ({ 0: '待支付', 3: '已完成', 2: '已取消' }[row.status] || '处理中'),
   },
   { colKey: 'created_at', title: '创建时间', cell: (_: unknown, row: OrderDTO) => formatTime(row.created_at) },
+  { colKey: 'op', title: '操作', width: 120 },
 ];
+
+function goPay(row: OrderDTO) {
+  payOrder.value = row;
+  payVisible.value = true;
+}
+
+function onPaid() {
+  load();
+}
 
 async function load() {
   loading.value = true;

@@ -22,6 +22,7 @@ import (
 	authsvc "mewsoproxy/server/service/auth"
 	ordersvc "mewsoproxy/server/service/order"
 	nodesvc "mewsoproxy/server/service/node"
+	paymentsvc "mewsoproxy/server/service/payment"
 	plansvc "mewsoproxy/server/service/plan"
 	subsvc "mewsoproxy/server/service/subscribe"
 	usersvc "mewsoproxy/server/service/user"
@@ -36,12 +37,13 @@ func New(cfg *config.Config, db *gorm.DB, rds *redisc.Client) *gin.Engine {
 	authSvc := authsvc.New(cfg, rds, userSvc)
 	planSvc := plansvc.New(db)
 	orderSvc := ordersvc.New(db, cfg)
+	paymentSvc := paymentsvc.NewService(db, cfg, orderSvc)
 
 	authHandler := auth.New(authSvc, userSvc)
 	userHandler := user.New(userSvc)
 	planHandler := plan.New(planSvc)
 	orderHandler := order.New(orderSvc)
-	paymentHandler := payment.New(orderSvc)
+	paymentHandler := payment.New(paymentSvc)
 	subSvc := subsvc.New(cfg, db)
 	subHandler := subscribe.New(subSvc, userSvc)
 
@@ -79,9 +81,13 @@ func New(cfg *config.Config, db *gorm.DB, rds *redisc.Client) *gin.Engine {
 		authed.GET("/order/list", orderHandler.List)
 		authed.POST("/order/detail", orderHandler.Detail)
 		authed.POST("/order/cancel", orderHandler.Cancel)
+
+		authed.GET("/payment/channels", paymentHandler.Channels)
+		authed.POST("/payment/create", paymentHandler.Create)
 	}
 
 	api.POST("/payment/notify", paymentHandler.Notify)
+	api.GET("/payment/notify", paymentHandler.Notify)
 
 	api.POST("/node/report", nodeHandler.Report)
 

@@ -29,17 +29,21 @@
         </t-row>
       </t-loading>
     </div>
+
+    <PayDialog v-model:visible="payVisible" :order="payOrder" @paid="onPaid" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { MessagePlugin } from 'tdesign-vue-next';
 import { listPlans, PlanDTO } from '@/api/plan';
-import { createOrder } from '@/api/order';
+import { createOrder, OrderDTO } from '@/api/order';
+import PayDialog from '@/components/PayDialog.vue';
 
 const plans = ref<PlanDTO[]>([]);
 const loading = ref(false);
+const payVisible = ref(false);
+const payOrder = ref<OrderDTO | null>(null);
 
 onMounted(async () => {
   loading.value = true;
@@ -51,8 +55,13 @@ onMounted(async () => {
 });
 
 async function buy(plan: PlanDTO, period: string) {
-  await createOrder({ plan_id: plan.id, period });
-  MessagePlugin.success('订单已创建，请在「订单」页完成支付');
+  const order = await createOrder({ plan_id: plan.id, period });
+  payOrder.value = order;
+  payVisible.value = true;
+}
+
+function onPaid() {
+  // 支付完成后无需额外操作
 }
 
 function formatMoney(v?: number): string {

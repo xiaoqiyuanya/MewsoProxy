@@ -23,6 +23,21 @@
       </t-col>
       <t-col :span="4">
         <t-card :bordered="false">
+          <t-statistic title="在线节点" :value="status.online_node_count" suffix="个" />
+        </t-card>
+      </t-col>
+      <t-col :span="4">
+        <t-card :bordered="false">
+          <t-statistic title="今日流量" :value="formatBytes(status.today_traffic)" />
+        </t-card>
+      </t-col>
+      <t-col :span="4">
+        <t-card :bordered="false">
+          <t-statistic title="活跃用户" :value="status.active_user_count" suffix="人" />
+        </t-card>
+      </t-col>
+      <t-col :span="4">
+        <t-card :bordered="false">
           <t-statistic title="数据库" :value="status.db_status === 'ok' ? '正常' : '异常'" />
         </t-card>
       </t-col>
@@ -54,6 +69,9 @@ const status = reactive<AdminSystemStatus>({
   user_count: 0,
   order_count: 0,
   today_paid_total: 0,
+  online_node_count: 0,
+  active_user_count: 0,
+  today_traffic: 0,
 });
 
 onMounted(async () => {
@@ -64,5 +82,17 @@ onMounted(async () => {
 function formatTime(v: number): string {
   if (!v) return '-';
   return new Date(v * 1000).toLocaleString();
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let i = 0;
+  let n = bytes;
+  while (n >= 1024 && i < units.length - 1) {
+    n /= 1024;
+    i++;
+  }
+  return `${n.toFixed(2)} ${units[i]}`;
 }
 </script>

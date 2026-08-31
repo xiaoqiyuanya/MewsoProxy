@@ -65,6 +65,9 @@ export interface AdminSystemStatus {
   user_count: number;
   order_count: number;
   today_paid_total: number;
+  online_node_count: number;
+  active_user_count: number;
+  today_traffic: number;
 }
 
 export interface ServerGroup {

@@ -1,4 +1,4 @@
-﻿package plan
+package plan
 
 import (
 	"context"
@@ -20,7 +20,7 @@ func New(db *gorm.DB) *Service {
 
 func (s *Service) List(ctx context.Context) ([]dto.PlanDetailDTO, error) {
 	var plans []model.Plan
-	if err := s.db.WithContext(ctx).Where("show = ?", true).Order("sort asc").Find(&plans).Error; err != nil {
+	if err := s.db.WithContext(ctx).Where("`show` = ?", true).Order("sort asc").Find(&plans).Error; err != nil {
 		return nil, apperror.Wrap(apperror.CodeDBError, "套餐列表获取失败", err)
 	}
 	out := make([]dto.PlanDetailDTO, 0, len(plans))
