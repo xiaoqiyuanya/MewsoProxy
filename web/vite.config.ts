@@ -21,7 +21,8 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      outDir: 'dist',
+      outDir: '../server/webui/dist',
+      emptyOutDir: true,
       sourcemap: false,
       chunkSizeWarningLimit: 1500,
       rollupOptions: {

@@ -1,6 +1,9 @@
 package router
 
 import (
+	"io/fs"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -26,6 +29,7 @@ import (
 	plansvc "mewsoproxy/server/service/plan"
 	subsvc "mewsoproxy/server/service/subscribe"
 	usersvc "mewsoproxy/server/service/user"
+	"mewsoproxy/server/webui"
 )
 
 func New(cfg *config.Config, db *gorm.DB, rds *redisc.Client) *gin.Engine {
@@ -137,6 +141,25 @@ func New(cfg *config.Config, db *gorm.DB, rds *redisc.Client) *gin.Engine {
 		adminGroup.POST("/payment/save", adminHandler.SavePayment)
 		adminGroup.POST("/payment/drop", adminHandler.DropPayment)
 		adminGroup.POST("/payment/show", adminHandler.TogglePaymentShow)
+	}
+
+	if sub, err := fs.Sub(webui.Dist, "dist"); err == nil {
+		if assets, err := fs.Sub(webui.Dist, "dist/assets"); err == nil {
+			r.StaticFS("/assets", http.FS(assets))
+		}
+		r.NoRoute(func(c *gin.Context) {
+			p := c.Request.URL.Path
+			if strings.HasPrefix(p, "/api/") {
+				response.Fail(c, 404, "route not found")
+				return
+			}
+			data, err := fs.ReadFile(sub, "index.html")
+			if err != nil {
+				response.Fail(c, 404, "not found")
+				return
+			}
+			c.Data(http.StatusOK, "text/html; charset=utf-8", data)
+		})
 	}
 
 	return r
