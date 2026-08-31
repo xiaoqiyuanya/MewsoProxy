@@ -57,15 +57,34 @@ ls -1
 
 ## 4. 启动
 
+> **低配服务器（如 2核2G）强烈推荐用一键脚本**，它会自动加 swap 兜底 + 串行构建，避免两个镜像并行构建把内存顶爆。
+
 ```bash
 cd /opt/mewsoproxy
-docker compose up -d --build
+bash ./deploy.sh
+```
+
+脚本做了什么：
+
+1. **内存兜底**：检测到内存 < 3G 且 swap 不足时，自动创建 2G swapfile（并写入 `/etc/fstab`），防止构建阶段 OOM。
+2. **串行构建**：先 `docker compose build server`，再 `docker compose build web`，**一次只构建一个镜像**，降低内存峰值。
+3. **启动**：`docker compose up -d` 并打印访问地址与默认管理员。
+
+### 手动方式（等价命令）
+
+```bash
+cd /opt/mewsoproxy
+# 串行构建，先后端后前端（不要用 up -d --build 并行构建）
+docker compose build server
+docker compose build web
+docker compose up -d
 ```
 
 注意：
 
-- `--build`：首次会把 `server/` 与 `web/` 各自构建成镜像，**不要省略**。
+- **不要**在低配机器上直接 `docker compose up -d --build`：它会**并行构建** server 与 web 两个镜像，加上 mysql/redis 已占内存，2G 机器极易 OOM 或卡死。
 - 启动顺序由 Compose 依赖控制：`mysql`、`redis` 先健康，随后 `server`（依赖二者），最后 `web`（依赖 `server` 健康）。
+- web 生产构建已默认**跳过 `vue-tsc` 类型检查**（该检查只占用内存、生产不需要），仅执行 `vite build`，进一步降低构建内存。
 
 ## 5. 验证服务健康
 

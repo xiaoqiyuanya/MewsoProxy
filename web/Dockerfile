@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
+RUN npm run build:docker
 
 # 运行阶段（nginx 托管静态资源，监听 8080）
 FROM ${NGINX_BASE}
