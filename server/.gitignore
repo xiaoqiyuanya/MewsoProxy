@@ -1,0 +1,13 @@
+.env
+.env.*
+*.log
+bin/
+dist/
+build/
+node_modules/
+.idea/
+.vscode/
+.DS_Store
+.claude/
+.codex/
+vendor/

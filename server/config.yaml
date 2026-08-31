@@ -1,0 +1,27 @@
+﻿server:
+  port: 8080
+
+database:
+  host: 127.0.0.1
+  port: 3306
+  user: root
+  password: ""
+  db_name: mewsoproxy
+  charset: utf8mb4
+  auto_migrate: true
+
+redis:
+  addr: 127.0.0.1:6379
+  password: ""
+  db: 0
+
+jwt:
+  access_secret: "change-me-access"
+  refresh_secret: "change-me-refresh"
+  access_ttl: 30m
+  refresh_ttl: 168h
+
+app:
+  register_enabled: true
+  default_group_id: 1
+  subscribe_url: "http://127.0.0.1:8080"

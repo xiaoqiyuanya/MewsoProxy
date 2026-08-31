@@ -1,0 +1,12 @@
+node_modules/
+dist/
+bin/
+build/
+.env
+.env.*
+*.log
+.DS_Store
+.idea/
+.vscode/
+.claude/
+.codex/

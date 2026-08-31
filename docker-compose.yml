@@ -1,0 +1,60 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mewsoproxy-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mewsoproxy
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./v2board-master/database/install.sql:/docker-entrypoint-initdb.d/install.sql:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: mewsoproxy-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build: ./server
+    container_name: mewsoproxy-server
+    restart: unless-stopped
+    environment:
+      MEWSO_SERVER_PORT: "8080"
+      MEWSO_DATABASE_HOST: mysql
+      MEWSO_DATABASE_PORT: "3306"
+      MEWSO_DATABASE_USER: root
+      MEWSO_DATABASE_PASSWORD: root
+      MEWSO_DATABASE_DB_NAME: mewsoproxy
+      MEWSO_DATABASE_AUTO_MIGRATE: "true"
+      MEWSO_REDIS_ADDR: redis:6379
+      MEWSO_JWT_ACCESS_SECRET: please-change-access-secret
+      MEWSO_JWT_REFRESH_SECRET: please-change-refresh-secret
+      MEWSO_APP_REGISTER_ENABLED: "true"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql_data:
+  redis_data:
