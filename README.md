@@ -77,19 +77,15 @@ MewsoProxy/
 
 ### Docker Compose（推荐）
 
-从 ghcr.io 拉取镜像的完整命令：
+从 ghcr.io 拉取镜像并启动：
 
 ```bash
-# 1. 配置镜像（可选，默认使用 mewsoproxy/server:latest）
-echo "MEWSO_SERVER_IMAGE=ghcr.io/<你的用户名>/mewsoproxy-server:latest" >> .env
-
-# 2. 私有镜像需登录 ghcr（公开镜像可跳过）
-docker login ghcr.io -u <你的用户名>   # 输入 GitHub 用户名 + PAT
-
-# 3. 拉取镜像并启动
+# 1. 拉取镜像并启动
 docker compose pull
 docker compose up -d
 ```
+
+> 本仓库为公开仓库，ghcr 镜像可直接匿名拉取；若后续改为私有仓库，需先执行 `docker login ghcr.io -u <用户名>`（输入 GitHub 用户名 + PAT）。
 
 > 镜像由 GitHub Actions 在推送代码后自动构建并发布到 ghcr.io，服务器环境无需本地构建（建议 2C2G 及更低配置直接采用此方式，避免构建期内存不足）。
 
