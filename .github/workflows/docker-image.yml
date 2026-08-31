@@ -39,7 +39,7 @@ jobs:
 
       - name: Test server
         working-directory: server
-        run: go test -mod=vendor ./...
+        run: go test ./...
 
       - name: Lowercase image name
         id: img
