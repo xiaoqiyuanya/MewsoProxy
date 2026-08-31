@@ -5,7 +5,7 @@
         <span>MewsoProxy</span>
         <span class="badge">Admin</span>
       </div>
-      <t-menu v-model="active" theme="light" style="border-right: none">
+      <t-menu v-model="active" theme="light" style="border-right: none" @change="onMenuChange">
         <t-menu-item value="/admin/dashboard">
           <template #icon><dashboard-icon /></template>
           概览
@@ -103,6 +103,10 @@ watch(
   },
   { immediate: true },
 );
+
+function onMenuChange(value: string | number) {
+  router.push(String(value));
+}
 
 function onDropdownClick(data: { value: string | number }) {
   if (data.value === 'frontend') {

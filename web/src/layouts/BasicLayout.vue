@@ -2,7 +2,7 @@
   <t-layout style="height: 100%">
     <t-aside width="232px" style="border-right: 1px solid var(--td-border-level-2-color)">
       <div class="logo">MewsoProxy</div>
-      <t-menu v-model="active" theme="light" style="border-right: none">
+      <t-menu v-model="active" theme="light" style="border-right: none" @change="onMenuChange">
         <t-menu-item value="/dashboard">
           <template #icon><dashboard-icon /></template>
           概览
@@ -63,6 +63,10 @@ watch(
   },
   { immediate: true },
 );
+
+function onMenuChange(value: string | number) {
+  router.push(String(value));
+}
 
 async function handleLogout() {
   try {
