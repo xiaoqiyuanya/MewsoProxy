@@ -19,6 +19,10 @@ import (
 
 func main() {
 	cfg := config.Load()
+	if err := config.EnsureSecrets(cfg, cfg.App.SecretsFile); err != nil {
+		slog.Error("ensure secrets failed", "err", err)
+		os.Exit(1)
+	}
 	if err := cfg.Validate(); err != nil {
 		slog.Error("config invalid", "err", err)
 		os.Exit(1)
@@ -38,6 +42,15 @@ func main() {
 	sqlDB.SetMaxIdleConns(8)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	defer sqlDB.Close()
+
+	bctx := context.Background()
+	if err := database.ApplySystemConfig(bctx, db, cfg); err != nil {
+		slog.Warn("apply system config failed", "err", err)
+	}
+	if err := database.SeedAdmin(bctx, db, cfg); err != nil {
+		slog.Error("seed admin failed", "err", err)
+		os.Exit(1)
+	}
 
 	rds := redis.New(cfg.Redis)
 	ctx := context.Background()

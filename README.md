@@ -69,6 +69,9 @@ docker compose up -d
 - 前端容器映射到宿主机 `8082` 端口，域名反向代理指向 `http://<服务器IP>:8082` 即可。
 - 前端内的 Nginx 已把 `/api` 转发到后端容器（`server:8080`），无需额外配置。
 - 如需直连后端 API，可使用宿主机 `8081` 端口。
+- **密钥自动生成**：首次启动会自动生成 JWT / SSH / 节点 token 密钥并写入命名卷 `server_data:/app/run/secrets.env`，重启保持稳定；也可通过环境变量 `MEWSO_JWT_ACCESS_SECRET` 等固定。
+- **默认管理员**：数据库无管理员时自动创建账号（默认 `admin@test.com` / `admin123`，可用 `MEWSO_ADMIN_EMAIL` / `MEWSO_ADMIN_PASSWORD` 覆盖），请务必在后台修改密码。
+- **订阅地址**：登录后台在「系统配置」中修改「订阅地址」为你的公开域名后生效（重启容器后生效）。
 
 ### 本地开发
 

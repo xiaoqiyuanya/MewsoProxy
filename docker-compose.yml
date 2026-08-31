@@ -44,9 +44,12 @@ services:
       MEWSO_DATABASE_DB_NAME: mewsoproxy
       MEWSO_DATABASE_AUTO_MIGRATE: "true"
       MEWSO_REDIS_ADDR: redis:6379
-      MEWSO_JWT_ACCESS_SECRET: please-change-access-secret
-      MEWSO_JWT_REFRESH_SECRET: please-change-refresh-secret
+      MEWSO_APP_SECRETS_FILE: /app/run/secrets.env
       MEWSO_APP_REGISTER_ENABLED: "true"
+      MEWSO_ADMIN_EMAIL: admin@test.com
+      MEWSO_ADMIN_PASSWORD: admin123
+    volumes:
+      - server_data:/app/run
     depends_on:
       mysql:
         condition: service_healthy
@@ -54,6 +57,8 @@ services:
         condition: service_healthy
     ports:
       - "8081:8080"
+    mem_limit: 256m
+    cpus: 0.5
 
   web:
     build: ./web
@@ -70,3 +75,4 @@ services:
 volumes:
   mysql_data:
   redis_data:
+  server_data:

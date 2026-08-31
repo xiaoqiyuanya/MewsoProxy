@@ -6,7 +6,9 @@ RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -ldflags="-s -w" -o /app/serve
 
 # 运行阶段
 FROM alpine:3.20
-RUN apk add --no-cache ca-certificates tzdata
+RUN apk add --no-cache ca-certificates tzdata \
+    && mkdir -p /app/run \
+    && chown -R 10001:10001 /app/run
 WORKDIR /app
 COPY --from=builder /app/server .
 COPY config.yaml ./config.yaml
