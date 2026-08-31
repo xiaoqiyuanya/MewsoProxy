@@ -1,4 +1,4 @@
-﻿package database
+package database
 
 import (
 	"fmt"
@@ -31,6 +31,20 @@ func InitDB(cfg config.DatabaseConfig) (*gorm.DB, error) {
 			&model.Coupon{},
 			&model.CommissionLog{},
 			&model.Notice{},
+			&model.Config{},
+			&model.ServerGroup{},
+			&model.ServerRoute{},
+			&model.ServerTrojan{},
+			&model.ServerVmess{},
+			&model.ServerShadowsocks{},
+			&model.ServerHysteria{},
+			&model.Stat{},
+			&model.StatServer{},
+			&model.StatUser{},
+			&model.Ticket{},
+			&model.TicketMessage{},
+			&model.Knowledge{},
+			&model.Log{},
 		); err != nil {
 			return nil, fmt.Errorf("database automigrate: %w", err)
 		}

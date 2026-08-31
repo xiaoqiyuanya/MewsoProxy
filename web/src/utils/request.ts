@@ -14,7 +14,7 @@ const CODE_NOT_LOGIN = 20001;
 const CODE_TOKEN_EXPIRED = 20003;
 
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
   timeout: 15000,
   withCredentials: true,
 });
@@ -32,7 +32,7 @@ let queue: Array<(token: string) => void> = [];
 
 async function refreshToken(): Promise<string> {
   const { data } = await axios.post<ApiResp<{ access_token: string }>>(
-    `${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/refresh`,
+    `${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/auth/refresh`,
     {},
     { withCredentials: true },
   );

@@ -10,3 +10,15 @@ build/
 .vscode/
 .claude/
 .codex/
+
+# 临时文件
+*.bak
+.tmp_*.json
+
+# 原始 Laravel 源码（保留在本地，不纳入版本管理）
+v2board-master/
+v2board-master.zip
+
+# Go 构建产物
+server/mewso
+server/bin/

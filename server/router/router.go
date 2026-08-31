@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"mewsoproxy/server/config"
+	"mewsoproxy/server/handler/admin"
 	"mewsoproxy/server/handler/auth"
 	"mewsoproxy/server/handler/order"
 	"mewsoproxy/server/handler/payment"
@@ -16,6 +17,7 @@ import (
 	"mewsoproxy/server/middleware"
 	redisc "mewsoproxy/server/pkg/redis"
 	"mewsoproxy/server/pkg/response"
+	adminsvc "mewsoproxy/server/service/admin"
 	authsvc "mewsoproxy/server/service/auth"
 	ordersvc "mewsoproxy/server/service/order"
 	plansvc "mewsoproxy/server/service/plan"
@@ -40,6 +42,9 @@ func New(cfg *config.Config, db *gorm.DB, rds *redisc.Client) *gin.Engine {
 	paymentHandler := payment.New(orderSvc)
 	subSvc := subsvc.New(cfg)
 	subHandler := subscribe.New(subSvc, userSvc)
+
+	adminSvc := adminsvc.New(db, cfg, rds, orderSvc)
+	adminHandler := admin.New(adminSvc, authSvc, userSvc)
 
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -71,6 +76,52 @@ func New(cfg *config.Config, db *gorm.DB, rds *redisc.Client) *gin.Engine {
 	}
 
 	api.POST("/payment/notify", paymentHandler.Notify)
+
+	api.POST("/admin/login", adminHandler.Login)
+
+	adminGroup := api.Group("/admin", middleware.Auth(cfg.JWT.AccessSecret, authSvc), middleware.AdminOnly())
+	{
+		adminGroup.GET("/config/fetch", adminHandler.GetConfig)
+		adminGroup.POST("/config/save", adminHandler.SaveConfig)
+		adminGroup.GET("/system/status", adminHandler.SystemStatus)
+
+		adminGroup.GET("/plan/list", adminHandler.ListPlans)
+		adminGroup.POST("/plan/save", adminHandler.SavePlan)
+		adminGroup.POST("/plan/drop", adminHandler.DropPlan)
+
+		adminGroup.GET("/user/list", adminHandler.ListUsers)
+		adminGroup.POST("/user/info", adminHandler.GetUser)
+		adminGroup.POST("/user/update", adminHandler.UpdateUser)
+		adminGroup.POST("/user/ban", adminHandler.BanUser)
+		adminGroup.POST("/user/reset_secret", adminHandler.ResetSecret)
+
+		adminGroup.GET("/order/list", adminHandler.ListOrders)
+		adminGroup.GET("/order/info", adminHandler.GetOrder)
+		adminGroup.POST("/order/cancel", adminHandler.CancelOrder)
+		adminGroup.POST("/order/paid", adminHandler.MarkOrderPaid)
+
+		adminGroup.GET("/server/group/list", adminHandler.ListGroups)
+		adminGroup.POST("/server/group/save", adminHandler.SaveGroup)
+		adminGroup.POST("/server/group/drop", adminHandler.DropGroup)
+		adminGroup.GET("/server/node/list", adminHandler.ListNodes)
+		adminGroup.POST("/server/node/save", adminHandler.SaveNode)
+		adminGroup.POST("/server/node/drop", adminHandler.DropNode)
+
+		adminGroup.GET("/coupon/list", adminHandler.ListCoupons)
+		adminGroup.POST("/coupon/save", adminHandler.SaveCoupon)
+		adminGroup.POST("/coupon/drop", adminHandler.DropCoupon)
+		adminGroup.POST("/coupon/show", adminHandler.ToggleCouponShow)
+
+		adminGroup.GET("/notice/list", adminHandler.ListNotices)
+		adminGroup.POST("/notice/save", adminHandler.SaveNotice)
+		adminGroup.POST("/notice/drop", adminHandler.DropNotice)
+		adminGroup.POST("/notice/show", adminHandler.ToggleNoticeShow)
+
+		adminGroup.GET("/payment/list", adminHandler.ListPayments)
+		adminGroup.POST("/payment/save", adminHandler.SavePayment)
+		adminGroup.POST("/payment/drop", adminHandler.DropPayment)
+		adminGroup.POST("/payment/show", adminHandler.TogglePaymentShow)
+	}
 
 	return r
 }

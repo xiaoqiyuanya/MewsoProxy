@@ -13,20 +13,20 @@ type InviteCode struct {
 func (InviteCode) TableName() string { return "v2_invite_code" }
 
 type Coupon struct {
-	ID               uint   `gorm:"primarykey;column:id"`
-	Code             string `gorm:"column:code"`
-	Name             string `gorm:"column:name"`
-	Type             int8   `gorm:"column:type"`
-	Value            int    `gorm:"column:value"`
-	Show             bool   `gorm:"column:show"`
-	LimitUse         *int   `gorm:"column:limit_use"`
-	LimitUseWithUser *int   `gorm:"column:limit_use_with_user"`
-	LimitPlanIDs     *string `gorm:"column:limit_plan_ids"`
-	LimitPeriod      *string `gorm:"column:limit_period"`
-	StartedAt        int64  `gorm:"column:started_at"`
-	EndedAt          int64  `gorm:"column:ended_at"`
-	CreatedAt        int64  `gorm:"column:created_at"`
-	UpdatedAt        int64  `gorm:"column:updated_at"`
+	ID               uint    `json:"id" gorm:"primarykey;column:id"`
+	Code             string  `json:"code" gorm:"column:code"`
+	Name             string  `json:"name" gorm:"column:name"`
+	Type             int8    `json:"type" gorm:"column:type"`
+	Value            int     `json:"value" gorm:"column:value"`
+	Show             bool    `json:"show" gorm:"column:show"`
+	LimitUse         *int    `json:"limit_use" gorm:"column:limit_use"`
+	LimitUseWithUser *int    `json:"limit_use_with_user" gorm:"column:limit_use_with_user"`
+	LimitPlanIDs     *string `json:"limit_plan_ids" gorm:"column:limit_plan_ids"`
+	LimitPeriod      *string `json:"limit_period" gorm:"column:limit_period"`
+	StartedAt        int64   `json:"started_at" gorm:"column:started_at"`
+	EndedAt          int64   `json:"ended_at" gorm:"column:ended_at"`
+	CreatedAt        int64   `json:"created_at" gorm:"column:created_at"`
+	UpdatedAt        int64   `json:"updated_at" gorm:"column:updated_at"`
 }
 
 func (Coupon) TableName() string { return "v2_coupon" }
@@ -45,14 +45,14 @@ type CommissionLog struct {
 func (CommissionLog) TableName() string { return "v2_commission_log" }
 
 type Notice struct {
-	ID        uint   `gorm:"primarykey;column:id"`
-	Title     string `gorm:"column:title"`
-	Content   string `gorm:"column:content"`
-	Show      bool   `gorm:"column:show"`
-	ImgURL    *string `gorm:"column:img_url"`
-	Tags      *string `gorm:"column:tags"`
-	CreatedAt int64  `gorm:"column:created_at"`
-	UpdatedAt int64  `gorm:"column:updated_at"`
+	ID        uint    `json:"id" gorm:"primarykey;column:id"`
+	Title     string  `json:"title" gorm:"column:title"`
+	Content   string  `json:"content" gorm:"column:content"`
+	Show      bool    `json:"show" gorm:"column:show"`
+	ImgURL    *string `json:"img_url" gorm:"column:img_url"`
+	Tags      *string `json:"tags" gorm:"column:tags"`
+	CreatedAt int64   `json:"created_at" gorm:"column:created_at"`
+	UpdatedAt int64   `json:"updated_at" gorm:"column:updated_at"`
 }
 
 func (Notice) TableName() string { return "v2_notice" }

@@ -65,6 +65,15 @@ func (c *Client) LRange(ctx context.Context, key string, start, stop int64) ([]s
 	return c.rdb.LRange(ctx, key, start, stop).Result()
 }
 
+func (c *Client) CountKeys(ctx context.Context, pattern string) (int64, error) {
+	var count int64
+	iter := c.rdb.Scan(ctx, 0, pattern, 500).Iterator()
+	for iter.Next(ctx) {
+		count++
+	}
+	return count, iter.Err()
+}
+
 func (c *Client) Close() error {
 	return c.rdb.Close()
 }

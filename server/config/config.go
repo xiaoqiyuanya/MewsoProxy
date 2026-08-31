@@ -1,4 +1,4 @@
-﻿package config
+package config
 
 import (
 	"fmt"
@@ -74,7 +74,7 @@ func Load() *Config {
 	v.SetDefault("jwt.refresh_ttl", "168h")
 	v.SetDefault("app.register_enabled", true)
 	v.SetDefault("app.default_group_id", 1)
-	v.SetDefault("app.subscribe_url", "http://127.0.0.1:8080")
+	v.SetDefault("app.subscribe_url", "http://localhost:8081")
 
 	if _, err := os.Stat("config.yaml"); err == nil {
 		_ = v.ReadInConfig()

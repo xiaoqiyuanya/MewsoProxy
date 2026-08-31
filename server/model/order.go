@@ -9,7 +9,7 @@ type Order struct {
 	PaymentID             *int   `gorm:"column:payment_id"`
 	Type                  int    `gorm:"column:type"`
 	Period                string `gorm:"column:period"`
-	TradeNo               string `gorm:"column:trade_no;uniqueIndex"`
+	TradeNo               string `gorm:"column:trade_no;type:varchar(36);uniqueIndex"`
 	CallbackNo            *string `gorm:"column:callback_no"`
 	TotalAmount           int    `gorm:"column:total_amount"`
 	HandlingAmount        *int   `gorm:"column:handling_amount"`

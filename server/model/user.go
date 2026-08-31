@@ -4,7 +4,7 @@ type User struct {
 	ID               uint   `gorm:"primarykey;column:id"`
 	InviteUserID     *uint  `gorm:"column:invite_user_id"`
 	TelegramID       *int64 `gorm:"column:telegram_id"`
-	Email            string `gorm:"column:email;uniqueIndex"`
+	Email            string `gorm:"column:email;type:varchar(64);uniqueIndex"`
 	Password         string `gorm:"column:password"`
 	PasswordAlgo     *string `gorm:"column:password_algo"`
 	PasswordSalt     *string `gorm:"column:password_salt"`
