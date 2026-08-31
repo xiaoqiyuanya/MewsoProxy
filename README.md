@@ -1,12 +1,12 @@
 # MewsoProxy
 
-基于 V2Board 数据模型重构的面板系统：Go 后端 + TDesign 前端。采用 Go (Gin + GORM + MySQL + Redis + JWT) 重写后端，前端使用 Vue 3.5 + tdesign-vue-next 构建。
+基于 Go 与 Vue 3 的全栈面板系统，包含用户端与管理端。
 
 ## 技术栈
 
 * **后端**：Go 1.22+、Gin、GORM、MySQL 8.4、Redis、JWT（双 Token）
 
-* **前端**：Vue 3.5、TypeScript、Vite、Pinia、tdesign-vue-next
+* **前端**：Vue 3.5、TypeScript、Vite、Pinia
 
 * **部署**：Docker Compose
 
@@ -21,13 +21,13 @@ MewsoProxy/
 │   ├── dto/             # 数据传输对象
 │   ├── handler/         # HTTP 处理器
 │   ├── middleware/      # 认证/限流/幂等/日志等中间件
-│   ├── model/           # GORM 模型（复用 v2_* 表）
+│   ├── model/           # GORM 模型
 │   ├── pkg/             # 响应/错误码/Token/Redis 等公共包
 │   ├── router/          # 路由注册（/api/v1）
 │   ├── service/         # 业务逻辑层
 │   ├── config.yaml      # 运行时配置
 │   └── main.go
-├── web/                 # TDesign 前端
+├── web/                 # 前端
 │   └── src/
 │       ├── api/         # 接口封装（用户端 + 管理端 admin）
 │       ├── layouts/     # BasicLayout / AdminLayout
@@ -35,7 +35,7 @@ MewsoProxy/
 │       ├── router/      # 前端路由与权限守卫
 │       ├── store/       # Pinia 状态
 │       └── utils/       # request / token
-├── docker-compose.yml   # MySQL + Redis + Server + Web 编排
+├── docker-compose.yml   # MySQL + Redis + Server 编排
 └── .gitignore
 ```
 
@@ -81,30 +81,15 @@ MewsoProxy/
 docker compose up -d
 ```
 
-* 启动后包含 3 个服务：MySQL、Redis、后端（`server`）。
+* 启动后包含 3 个服务：MySQL、Redis、后端（`server`）。前端静态资源内嵌于后端，无需独立的 web/Nginx 容器，后端容器映射到宿主机 `8082` 端口，同时托管前端页面与 `/api/v1` API。
 
-* **前端已用** **`go:embed`** **内嵌进后端二进制**，因此无需独立的 web/Nginx 容器。后端容器映射到宿主机 `8082` 端口，同时托管「前端静态页 + `/api/v1` API」，域名反向代理指向 `http://<服务器IP>:8082` 即可。
+* **密钥自动生成**：首次启动自动生成 JWT / SSH / 节点 token 密钥并持久化，重启保持稳定；也可通过 `MEWSO_JWT_ACCESS_SECRET` 等环境变量固定。
 
-- **服务器零构建**：镜像由 GitHub Actions 云端构建并发布到 ghcr.io（见下方三步），服务器只拉取运行，2C2G 也不会 OOM；本地开发时仍可用 `docker compose build` 从源码构建。
+* **默认管理员**：数据库无管理员时自动创建 `admin@test.com / admin123`（可用 `MEWSO_ADMIN_EMAIL` / `MEWSO_ADMIN_PASSWORD` 覆盖），请登录后立即修改密码。
 
-* **密钥自动生成**：首次启动会自动生成 JWT / SSH / 节点 token 密钥并写入命名卷 `server_data:/app/run/secrets.env`，重启保持稳定；也可通过环境变量 `MEWSO_JWT_ACCESS_SECRET` 等固定。
+* **订阅地址**：登录后台在「系统配置」中修改为你的公开域名，重启容器后生效。
 
-* **默认管理员**：数据库无管理员时自动创建账号（默认 `admin@test.com` / `admin123`，可用 `MEWSO_ADMIN_EMAIL` / `MEWSO_ADMIN_PASSWORD` 覆盖），请务必在后台修改密码。
-
-* **订阅地址**：登录后台在「系统配置」中修改「订阅地址」为你的公开域名后生效（重启容器后生效）。
-
-> **服务器部署（零构建，2C2G 可用）**：推送到 GitHub 后，Actions 自动构建镜像并发布到 ghcr.io。服务器上只需三步：
->
-> ```bash
-> # 1) 克隆仓库（或仅下载 docker-compose.yml），并在同目录创建 .env 指定镜像
-> echo 'MEWSO_SERVER_IMAGE=ghcr.io/<用户名>/mewsoproxy-server:latest' > .env
-> # 2) 私有镜像需一次性登录 ghcr（PAT 勾选 read:packages）
-> echo <GITHUB_PAT> | docker login ghcr.io -u <用户名> --password-stdin
-> # 3) 拉取并启动
-> docker compose pull && docker compose up -d
-> ```
->
-> 后续更新：`git pull && docker compose pull && docker compose up -d`
+* 生产部署建议使用 CI 构建的镜像：推送代码后由 GitHub Actions 自动构建并发布到 ghcr.io，服务器上执行 `docker compose pull && docker compose up -d` 即可（私有镜像需先 `docker login ghcr.io`）。
 
 ### 本地开发
 

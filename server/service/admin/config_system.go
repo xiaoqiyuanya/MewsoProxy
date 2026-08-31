@@ -7,6 +7,7 @@ import (
 	"mewsoproxy/server/dto"
 	"mewsoproxy/server/model"
 	"mewsoproxy/server/pkg/apperror"
+	redispkg "mewsoproxy/server/pkg/redis"
 )
 
 var defaultConfig = map[string]string{
@@ -59,7 +60,7 @@ func (s *Service) SystemStatus(ctx context.Context) (dto.AdminSystemStatusDTO, e
 	res.OrderCount = orderCount
 	res.TodayPaidTotal = todayPaid
 	if s.rds != nil {
-		online, _ := s.rds.CountKeys(ctx, "v2board:user:token:*")
+		online, _ := s.rds.CountKeys(ctx, redispkg.RedisKeyUserToken+"*")
 		res.OnlineUserCount = online
 	}
 	day := todayRecordAt()
