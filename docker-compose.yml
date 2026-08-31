@@ -8,7 +8,6 @@ services:
       MYSQL_DATABASE: mewsoproxy
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./v2board-master/database/install.sql:/docker-entrypoint-initdb.d/install.sql:ro
     ports:
       - "3306:3306"
     healthcheck:
