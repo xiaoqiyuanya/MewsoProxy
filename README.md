@@ -33,7 +33,7 @@ MewsoProxy/
 │       ├── router/      # 前端路由与权限守卫
 │       ├── store/       # Pinia 状态
 │       └── utils/       # request / token
-├── docker-compose.yml   # MySQL + Redis + Server 编排
+├── docker-compose.yml   # MySQL + Redis + Server + Web 编排
 └── .gitignore
 ```
 
