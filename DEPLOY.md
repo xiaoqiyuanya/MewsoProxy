@@ -55,36 +55,55 @@ ls -1
 
 > 密钥（JWT / SSH / 节点 token）**无需配置**：留空或为占位值时，服务首次启动会生成随机密钥并写入命名卷 `server_data:/app/run/secrets.env`，重启保持稳定。
 
-## 4. 启动
+## 4. 构建与分发镜像（本地/CI 一次完成，服务器零构建）
 
-> **低配服务器（如 2核2G）强烈推荐用一键脚本**，它会自动加 swap 兜底 + 串行构建，避免两个镜像并行构建把内存顶爆。
+> **关键：镜像在本地/CI 构建，绝不要在低配服务器上构建。** 2C2G 服务器只需**加载镜像**即可，这也是 new-api/sub-store 等能在小机器上顺滑部署的原因——服务器只 `pull`/`load`，从不编译。
+
+### 4.1 本地构建并导出离线包
+
+在任一台有 Docker 的机器上（你的开发机/CI）：
+
+```bash
+cd mewsoproxy
+bash ./docker-build.sh
+```
+
+- 产物：`mewsoproxy-images.tar.gz`（内含 `mewsoproxy/server:latest` 与 `mewsoproxy/web:latest` 两个镜像）。
+- 若有镜像仓库：把 compose 里 `image` 改成仓库地址后，用 `docker compose build server web && docker compose push`，服务器端 `docker compose pull` 即可。
+
+### 4.2 服务器加载并启动（零构建）
+
+把 `mewsoproxy-images.tar.gz` 上传到服务器（与 `docker-compose.yml`、`deploy.sh` 放一起）：
 
 ```bash
 cd /opt/mewsoproxy
+docker load < mewsoproxy-images.tar.gz
 bash ./deploy.sh
 ```
 
-脚本做了什么：
+`deploy.sh` 的决策顺序（**默认永不触发源码构建**）：
 
-1. **内存兜底**：检测到内存 < 3G 且 swap 不足时，自动创建 2G swapfile（并写入 `/etc/fstab`），防止构建阶段 OOM。
-2. **串行构建**：先 `docker compose build server`，再 `docker compose build web`，**一次只构建一个镜像**，降低内存峰值。
-3. **启动**：`docker compose up -d` 并打印访问地址与默认管理员。
+1. 本机已存在镜像 → 直接启动；
+2. 否则加载同目录 `mewsoproxy-images.tar.gz`；
+3. 否则 `docker compose pull`（镜像仓库分发）；
+4. 最后 `docker compose up -d`。
 
-### 手动方式（等价命令）
+> 也可以只上传整个仓库，服务器执行 `bash ./deploy.sh`，脚本会自动优先使用本地镜像。
+
+### 回退：源码构建（仅 4G+ 机器）
 
 ```bash
-cd /opt/mewsoproxy
-# 串行构建，先后端后前端（不要用 up -d --build 并行构建）
-docker compose build server
-docker compose build web
-docker compose up -d
+bash ./deploy.sh --build
 ```
+
+该模式才会在服务器上编译：串行构建 + 自动创建 swap 兜底。**低配机器不要用。**
+
+> 说明：`docker-compose.yml` 的 `server`/`web` 同时声明了 `image:` 与 `build:`，因此 `docker compose up -d`（不带 `--build`）会直接用已加载的镜像，只有显式 `docker compose build` 或 `--build` 才会在服务器上编译。
 
 注意：
 
-- **不要**在低配机器上直接 `docker compose up -d --build`：它会**并行构建** server 与 web 两个镜像，加上 mysql/redis 已占内存，2G 机器极易 OOM 或卡死。
 - 启动顺序由 Compose 依赖控制：`mysql`、`redis` 先健康，随后 `server`（依赖二者），最后 `web`（依赖 `server` 健康）。
-- web 生产构建已默认**跳过 `vue-tsc` 类型检查**（该检查只占用内存、生产不需要），仅执行 `vite build`，进一步降低构建内存。
+- web 生产构建已默认**跳过 `vue-tsc` 类型检查**（仅生产不需要、只占内存），只执行 `vite build`，进一步降低构建内存。
 
 ## 5. 验证服务健康
 

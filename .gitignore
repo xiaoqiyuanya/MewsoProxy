@@ -15,6 +15,8 @@ build/
 # 临时文件
 *.bak
 .tmp_*.json
+*.tar.gz
+server.zip
 
 # 原始 Laravel 源码（保留在本地，不纳入版本管理）
 v2board-master/

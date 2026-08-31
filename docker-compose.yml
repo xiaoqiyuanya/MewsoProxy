@@ -31,6 +31,7 @@ services:
       retries: 10
 
   server:
+    image: mewsoproxy/server:latest
     build: ./server
     container_name: mewsoproxy-server
     restart: unless-stopped
@@ -60,6 +61,7 @@ services:
     cpus: 0.5
 
   web:
+    image: mewsoproxy/web:latest
     build: ./web
     container_name: mewsoproxy-web
     restart: unless-stopped
