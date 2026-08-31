@@ -31,7 +31,7 @@ services:
       retries: 10
 
   server:
-    image: ${MEWSO_SERVER_IMAGE:-mewsoproxy/server:latest}
+    image: ${MEWSO_SERVER_IMAGE:-ghcr.io/xiaoqiyuanya/mewsoproxy-server:latest}
     build: ./server
     container_name: mewsoproxy-server
     restart: unless-stopped
