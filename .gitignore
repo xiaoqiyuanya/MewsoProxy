@@ -18,11 +18,10 @@ build/
 *.bak
 .tmp_*.json
 *.tar.gz
-server.zip
+*.zip
 
-# 原始 Laravel 源码（保留在本地，不纳入版本管理）
-v2board-master/
-v2board-master.zip
+# 本地个人部署笔记（不随仓库分发）
+DEPLOY.md
 
 # Go 构建产物
 server/mewso
