@@ -103,6 +103,20 @@ func (s *Service) GetByID(ctx context.Context, id uint) (*model.User, error) {
 	return &u, nil
 }
 
+func (s *Service) GetByToken(ctx context.Context, token string) (*model.User, error) {
+	if token == "" {
+		return nil, apperror.New(apperror.CodeParamMissing, "订阅令牌缺失")
+	}
+	var u model.User
+	if err := s.db.WithContext(ctx).Where("token = ?", token).First(&u).Error; err != nil {
+		return nil, apperror.New(apperror.CodeUserNotFound, "订阅令牌无效")
+	}
+	if u.Banned {
+		return nil, apperror.New(apperror.CodeNoPermission, "账号已被封禁")
+	}
+	return &u, nil
+}
+
 func (s *Service) defaultCommissionRate() int {
 	return 0
 }

@@ -130,6 +130,20 @@ type AdminServerNodeSaveReq struct {
 	Insecure       *bool   `json:"insecure,omitempty"`
 }
 
+type AdminNodeInstallReq struct {
+	ID            int    `json:"id" binding:"required,min=1"`
+	Type          string `json:"type" binding:"required"` // trojan|vmess|shadowsocks|hysteria
+	SSHHost       string `json:"ssh_host"`
+	SSHPort       int    `json:"ssh_port"`
+	SSHUser       string `json:"ssh_user"`
+	SSHPassword   string `json:"ssh_password"`
+	SSHPrivateKey string `json:"ssh_private_key"`
+}
+
+type AdminNodeInstallResp struct {
+	TaskID string `json:"task_id"`
+}
+
 type AdminConfigReq struct {
 	Key   string `json:"key" binding:"required"`
 	Value string `json:"value"`

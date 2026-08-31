@@ -33,6 +33,7 @@
         <template #op="{ row }">
           <t-space size="small">
             <t-button theme="primary" variant="text" @click="openNodeEdit(row)">编辑</t-button>
+            <t-button theme="success" variant="text" @click="openInstall(row)">安装</t-button>
             <t-button theme="danger" variant="text" @click="onDropNode(row)">删除</t-button>
           </t-space>
         </template>
@@ -112,11 +113,35 @@
         </t-form-item>
       </t-form>
     </t-dialog>
+
+    <t-dialog v-model:visible="installDialogVisible" header="远程安装节点" width="560px" :confirm-btn="{ loading: installing, onClick: submitInstall }">
+      <t-form :data="installForm" label-width="110px">
+        <t-form-item label="SSH 主机" required>
+          <t-input v-model="installForm.ssh_host" placeholder="节点 SSH 地址" />
+        </t-form-item>
+        <t-form-item label="SSH 端口">
+          <t-input-number v-model="installForm.ssh_port" :min="1" :max="65535" />
+        </t-form-item>
+        <t-form-item label="用户名" required>
+          <t-input v-model="installForm.ssh_user" placeholder="root" />
+        </t-form-item>
+        <t-form-item label="密码">
+          <t-input v-model="installForm.ssh_password" type="password" placeholder="与私钥二选一" />
+        </t-form-item>
+        <t-form-item label="私钥">
+          <t-textarea v-model="installForm.ssh_private_key" :autosize="{ minRows: 4, maxRows: 8 }" placeholder="SSH 私钥内容（可选）" />
+        </t-form-item>
+      </t-form>
+    </t-dialog>
+
+    <t-dialog v-model:visible="installLogVisible" header="安装日志" width="640px" :footer="false">
+      <t-textarea :model-value="installLogText" readonly :autosize="{ minRows: 14, maxRows: 24 }" />
+    </t-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, computed } from 'vue';
+import { onMounted, onUnmounted, reactive, ref, computed } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import {
   listGroups,
@@ -125,6 +150,8 @@ import {
   listNodes,
   saveNode,
   dropNode,
+  installNode,
+  nodeInstallLogUrl,
   ServerGroup,
   AdminServerGroupSaveReq,
   ServerNode,
@@ -176,7 +203,7 @@ const nodeColumns = computed(() => [
   { colKey: 'server_port', title: '服务端口', width: 100 },
   { colKey: 'rate', title: '倍率', width: 80 },
   { colKey: 'show', title: '展示', cell: (_: unknown, row: ServerNode) => (row.show ? '是' : '否') },
-  { colKey: 'op', title: '操作', width: 140 },
+  { colKey: 'op', title: '操作', width: 200 },
 ]);
 
 async function loadGroups() {
@@ -322,6 +349,69 @@ function formatTime(v?: number): string {
   if (!v) return '-';
   return new Date(v * 1000).toLocaleString();
 }
+
+const installDialogVisible = ref(false);
+const installLogVisible = ref(false);
+const installForm = reactive({ ssh_host: '', ssh_port: 22, ssh_user: 'root', ssh_password: '', ssh_private_key: '' });
+const installLogText = ref('');
+const installing = ref(false);
+let currentNode: ServerNode | null = null;
+let es: EventSource | null = null;
+
+function openInstall(row: ServerNode) {
+  currentNode = row;
+  installForm.ssh_host = row.host;
+  installForm.ssh_port = 22;
+  installForm.ssh_user = 'root';
+  installForm.ssh_password = '';
+  installForm.ssh_private_key = '';
+  installLogText.value = '';
+  installDialogVisible.value = true;
+}
+
+async function submitInstall() {
+  if (!currentNode) return;
+  if (!installForm.ssh_host || !installForm.ssh_user) {
+    MessagePlugin.error('请填写 SSH 信息');
+    return;
+  }
+  installing.value = true;
+  try {
+    const { task_id } = await installNode({
+      id: currentNode.id,
+      type: nodeType.value,
+      ssh_host: installForm.ssh_host,
+      ssh_port: installForm.ssh_port,
+      ssh_user: installForm.ssh_user,
+      ssh_password: installForm.ssh_password || undefined,
+      ssh_private_key: installForm.ssh_private_key || undefined,
+    });
+    installDialogVisible.value = false;
+    openLog(task_id);
+  } catch {
+    MessagePlugin.error('发起安装失败');
+  } finally {
+    installing.value = false;
+  }
+}
+
+function openLog(taskID: string) {
+  installLogText.value = '';
+  installLogVisible.value = true;
+  es?.close();
+  es = new EventSource(nodeInstallLogUrl(taskID));
+  es.onmessage = (ev) => {
+    installLogText.value += ev.data + '\n';
+    if (ev.data === '##INSTALL_DONE##' || ev.data.startsWith('##INSTALL_FAILED')) {
+      es?.close();
+      MessagePlugin.success(ev.data === '##INSTALL_DONE##' ? '安装完成' : '安装失败');
+      loadNodes();
+    }
+  };
+  es.onerror = () => es?.close();
+}
+
+onUnmounted(() => es?.close());
 
 onMounted(() => {
   loadGroups();

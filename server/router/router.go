@@ -40,7 +40,7 @@ func New(cfg *config.Config, db *gorm.DB, rds *redisc.Client) *gin.Engine {
 	planHandler := plan.New(planSvc)
 	orderHandler := order.New(orderSvc)
 	paymentHandler := payment.New(orderSvc)
-	subSvc := subsvc.New(cfg)
+	subSvc := subsvc.New(cfg, db)
 	subHandler := subscribe.New(subSvc, userSvc)
 
 	adminSvc := adminsvc.New(db, cfg, rds, orderSvc)
@@ -55,6 +55,7 @@ func New(cfg *config.Config, db *gorm.DB, rds *redisc.Client) *gin.Engine {
 	r.GET("/healthz", func(c *gin.Context) {
 		response.OK(c, gin.H{"status": "ok"})
 	})
+	r.GET("/subscribe", subHandler.Download)
 
 	api := r.Group("/api/v1")
 
@@ -106,6 +107,8 @@ func New(cfg *config.Config, db *gorm.DB, rds *redisc.Client) *gin.Engine {
 		adminGroup.GET("/server/node/list", adminHandler.ListNodes)
 		adminGroup.POST("/server/node/save", adminHandler.SaveNode)
 		adminGroup.POST("/server/node/drop", adminHandler.DropNode)
+		adminGroup.POST("/server/node/install", adminHandler.NodeInstall)
+		adminGroup.GET("/server/node/install/log", adminHandler.NodeInstallLog)
 
 		adminGroup.GET("/coupon/list", adminHandler.ListCoupons)
 		adminGroup.POST("/coupon/save", adminHandler.SaveCoupon)

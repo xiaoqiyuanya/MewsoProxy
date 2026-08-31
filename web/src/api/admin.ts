@@ -1,4 +1,5 @@
 import request from '@/utils/request';
+import { getToken } from '@/utils/token';
 import type { AuthResp } from '@/api/auth';
 import type { PlanDTO } from '@/api/plan';
 import type { OrderDTO } from '@/api/order';
@@ -348,4 +349,23 @@ export function dropPayment(id: number) {
 
 export function togglePaymentShow(id: number, enable: boolean) {
   return request.post<null, null>('/admin/payment/show', { id, enable });
+}
+
+export interface AdminNodeInstallReq {
+  id: number;
+  type: string;
+  ssh_host: string;
+  ssh_port: number;
+  ssh_user: string;
+  ssh_password?: string;
+  ssh_private_key?: string;
+}
+
+export function installNode(data: AdminNodeInstallReq) {
+  return request.post<{ task_id: string }, { task_id: string }>('/admin/server/node/install', data);
+}
+
+export function nodeInstallLogUrl(taskID: string) {
+  const base = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+  return `${base}/admin/server/node/install/log?task_id=${taskID}&token=${getToken()}`;
 }

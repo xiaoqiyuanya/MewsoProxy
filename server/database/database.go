@@ -38,6 +38,7 @@ func InitDB(cfg config.DatabaseConfig) (*gorm.DB, error) {
 			&model.ServerVmess{},
 			&model.ServerShadowsocks{},
 			&model.ServerHysteria{},
+			&model.ServerNodeSSH{},
 			&model.Stat{},
 			&model.StatServer{},
 			&model.StatUser{},

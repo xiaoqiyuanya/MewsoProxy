@@ -1,4 +1,4 @@
-﻿package middleware
+package middleware
 
 import (
 	"context"
@@ -26,6 +26,11 @@ type TokenValidator interface {
 func Auth(secret string, validator TokenValidator) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		auth := c.GetHeader("Authorization")
+		if auth == "" {
+			if q := c.Query("token"); q != "" {
+				auth = "Bearer " + q
+			}
+		}
 		if auth == "" {
 			response.Fail(c, apperror.CodeNotLogin, "未登录")
 			c.Abort()

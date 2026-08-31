@@ -55,3 +55,12 @@ export function logout() {
 export function getMe() {
   return request.get<UserDTO, UserDTO>('/user/me');
 }
+
+export interface SubscribeResp {
+  token: string;
+  url: string;
+}
+
+export function getSubscribe() {
+  return request.get<SubscribeResp, SubscribeResp>('/user/subscribe');
+}

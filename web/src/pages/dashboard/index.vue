@@ -16,6 +16,10 @@
             <t-descriptions-item label="订阅 Token">
               <code>{{ user?.token }}</code>
             </t-descriptions-item>
+            <t-descriptions-item label="订阅地址">
+              <code style="word-break: break-all">{{ subUrl }}</code>
+              <t-button theme="primary" variant="outline" size="small" style="margin-left: 8px" @click="copyUrl">复制</t-button>
+            </t-descriptions-item>
           </t-descriptions>
         </t-card>
       </t-col>
@@ -37,17 +41,37 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { getSubscribe } from '@/api/auth';
 import { useUserStore } from '@/store/user';
 
 const store = useUserStore();
 const user = computed(() => store.user);
+const subUrl = ref('');
 
 const trafficPercent = computed(() => {
   const total = user.value?.transfer_enable || 0;
   if (total <= 0) return 0;
   return Math.min(100, Math.round(((user.value?.used_traffic || 0) / total) * 100));
 });
+
+async function loadSubscribe() {
+  try {
+    const r = await getSubscribe();
+    subUrl.value = r.url;
+  } catch {
+    // 忽略，未登录时无订阅
+  }
+}
+
+async function copyUrl() {
+  if (!subUrl.value) return;
+  await navigator.clipboard.writeText(subUrl.value);
+  MessagePlugin.success('已复制订阅地址');
+}
+
+onMounted(loadSubscribe);
 
 function formatTime(v?: string): string {
   if (!v) return '-';
