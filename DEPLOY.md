@@ -81,14 +81,14 @@ docker load < mewsoproxy-images.tar.gz
 bash ./deploy.sh
 ```
 
-`deploy.sh` 的决策顺序（**默认永不触发源码构建**）：
+`deploy.sh` 的决策顺序（**默认自适应**）：
 
 1. 本机已存在镜像 → 直接启动；
 2. 否则加载同目录 `mewsoproxy-images.tar.gz`；
-3. 否则 `docker compose pull`（镜像仓库分发）；
+3. 否则**自动源码构建兜底**（低配机自动加 swap，`bash deploy.sh --pull` 可强制走仓库拉取）；
 4. 最后 `docker compose up -d`。
 
-> 也可以只上传整个仓库，服务器执行 `bash ./deploy.sh`，脚本会自动优先使用本地镜像。
+> 也可以只上传整个仓库，服务器直接 `bash ./deploy.sh`，脚本会自动优先使用本地镜像。
 
 ### 回退：源码构建（仅 4G+ 机器）
 

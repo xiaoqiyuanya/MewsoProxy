@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# MewsoProxy 服务器部署脚本（镜像分发模式：默认零构建，2C2G 无压力）
+# MewsoProxy 服务器部署脚本（默认自适应的镜像分发模式）
 # 用法:
-#   bash deploy.sh                  # 优先用本机已有镜像；否则加载离线包；否则拉取仓库
-#   bash deploy.sh --build          # 回退到源码构建（仅建议在 4G+ 机器，低配会触发 swap）
-# 前置：镜像由本地执行 docker-build.sh 构建导出，或推送到镜像仓库。
+#   bash deploy.sh                  # 自动：有镜像用镜像 → 无则加载离线包 → 都无则源码构建兜底(自动加 swap)
+#   bash deploy.sh --build          # 强制源码构建（自动加 swap 兜底）
+#   bash deploy.sh --pull           # 强制从镜像仓库拉取
+# 说明：镜像默认由本地 docker-build.sh 构建导出，或推送到镜像仓库。
 set -euo pipefail
 
 cd "$(dirname "$0")"
@@ -36,21 +37,34 @@ ensure_swap() {
   fi
 }
 
-if [ "${1:-}" = "--build" ]; then
-  ensure_swap
-  log "源码构建模式：构建 server 镜像 ..."
-  docker compose build server
-  log "源码构建模式：构建 web 镜像 ..."
-  docker compose build web
-elif has_image "$SERVER_IMG" && has_image "$WEB_IMG"; then
-  log "本机已有镜像，跳过加载"
-elif [ -f "$TAR_GZ" ]; then
-  log "检测到离线镜像包，加载 ${TAR_GZ} ..."
-  docker load < "$TAR_GZ"
-else
-  log "未找到离线镜像包，尝试从镜像仓库拉取 ..."
-  docker compose pull
-fi
+case "${1:-}" in
+  --build)
+    ensure_swap
+    log "源码构建模式：构建 server 镜像 ..."
+    docker compose build server
+    log "源码构建模式：构建 web 镜像 ..."
+    docker compose build web
+    ;;
+  --pull)
+    log "从镜像仓库拉取镜像 ..."
+    docker compose pull
+    ;;
+  *)
+    if has_image "$SERVER_IMG" && has_image "$WEB_IMG"; then
+      log "本机已有镜像，跳过加载"
+    elif [ -f "$TAR_GZ" ]; then
+      log "加载离线镜像包 ${TAR_GZ} ..."
+      docker load < "$TAR_GZ"
+    else
+      warn "未找到本地镜像，执行源码构建兜底（低配机将自动加 swap）..."
+      ensure_swap
+      log "构建 server 镜像 ..."
+      docker compose build server
+      log "构建 web 镜像 ..."
+      docker compose build web
+    fi
+    ;;
+esac
 
 log "启动全部服务 ..."
 docker compose up -d
