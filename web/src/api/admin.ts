@@ -102,6 +102,10 @@ export interface ServerNode {
   up_mbps?: number;
   down_mbps?: number;
   insecure?: boolean;
+  online?: boolean;
+  last_online_at?: number;
+  uptime?: number;
+  load?: number;
 }
 
 export interface AdminServerNodeSaveReq {

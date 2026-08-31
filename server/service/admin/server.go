@@ -44,34 +44,106 @@ func (s *Service) DropGroup(ctx context.Context, id int) error {
 	return nil
 }
 
-func (s *Service) ListNodes(ctx context.Context, nodeType string) (interface{}, error) {
+func (s *Service) ListNodes(ctx context.Context, nodeType string) ([]dto.AdminServerNodeResp, error) {
 	switch nodeType {
 	case "trojan":
 		var list []model.ServerTrojan
 		if err := s.db.WithContext(ctx).Order("sort asc").Find(&list).Error; err != nil {
 			return nil, apperror.Wrap(apperror.CodeDBError, "节点查询失败", err)
 		}
-		return list, nil
+		tele := s.loadTelemetry(ctx, nodeType)
+		resp := make([]dto.AdminServerNodeResp, 0, len(list))
+		for _, n := range list {
+			item := dto.AdminServerNodeResp{
+				ID: n.ID, GroupID: n.GroupID, RouteID: n.RouteID, ParentID: n.ParentID,
+				Tags: n.Tags, Name: n.Name, Rate: n.Rate, Host: n.Host, Port: n.Port,
+				ServerPort: n.ServerPort, Show: n.Show, Sort: n.Sort,
+				CreatedAt: n.CreatedAt, UpdatedAt: n.UpdatedAt,
+				AllowInsecure: &n.AllowInsecure, ServerName: n.ServerName,
+			}
+			s.mergeTelemetry(&item, nodeType, n.ID, tele)
+			resp = append(resp, item)
+		}
+		return resp, nil
 	case "vmess":
 		var list []model.ServerVmess
 		if err := s.db.WithContext(ctx).Order("sort asc").Find(&list).Error; err != nil {
 			return nil, apperror.Wrap(apperror.CodeDBError, "节点查询失败", err)
 		}
-		return list, nil
+		tele := s.loadTelemetry(ctx, nodeType)
+		resp := make([]dto.AdminServerNodeResp, 0, len(list))
+		for _, n := range list {
+			item := dto.AdminServerNodeResp{
+				ID: n.ID, GroupID: n.GroupID, RouteID: n.RouteID, ParentID: n.ParentID,
+				Tags: n.Tags, Name: n.Name, Rate: n.Rate, Host: n.Host, Port: n.Port,
+				ServerPort: n.ServerPort, Show: n.Show, Sort: n.Sort,
+				CreatedAt: n.CreatedAt, UpdatedAt: n.UpdatedAt,
+				TLS: &n.TLS, Network: &n.Network,
+			}
+			s.mergeTelemetry(&item, nodeType, n.ID, tele)
+			resp = append(resp, item)
+		}
+		return resp, nil
 	case "shadowsocks", "ss":
 		var list []model.ServerShadowsocks
 		if err := s.db.WithContext(ctx).Order("sort asc").Find(&list).Error; err != nil {
 			return nil, apperror.Wrap(apperror.CodeDBError, "节点查询失败", err)
 		}
-		return list, nil
+		tele := s.loadTelemetry(ctx, "shadowsocks")
+		resp := make([]dto.AdminServerNodeResp, 0, len(list))
+		for _, n := range list {
+			item := dto.AdminServerNodeResp{
+				ID: n.ID, GroupID: n.GroupID, RouteID: n.RouteID, ParentID: n.ParentID,
+				Tags: n.Tags, Name: n.Name, Rate: n.Rate, Host: n.Host, Port: n.Port,
+				ServerPort: n.ServerPort, Show: n.Show, Sort: n.Sort,
+				CreatedAt: n.CreatedAt, UpdatedAt: n.UpdatedAt,
+				Cipher: &n.Cipher,
+			}
+			s.mergeTelemetry(&item, "shadowsocks", n.ID, tele)
+			resp = append(resp, item)
+		}
+		return resp, nil
 	case "hysteria":
 		var list []model.ServerHysteria
 		if err := s.db.WithContext(ctx).Order("sort asc").Find(&list).Error; err != nil {
 			return nil, apperror.Wrap(apperror.CodeDBError, "节点查询失败", err)
 		}
-		return list, nil
+		tele := s.loadTelemetry(ctx, nodeType)
+		resp := make([]dto.AdminServerNodeResp, 0, len(list))
+		for _, n := range list {
+			item := dto.AdminServerNodeResp{
+				ID: n.ID, GroupID: n.GroupID, RouteID: n.RouteID, ParentID: n.ParentID,
+				Tags: n.Tags, Name: n.Name, Rate: n.Rate, Host: n.Host, Port: n.Port,
+				ServerPort: n.ServerPort, Show: n.Show, Sort: n.Sort,
+				CreatedAt: n.CreatedAt, UpdatedAt: n.UpdatedAt,
+				UpMbps: &n.UpMbps, DownMbps: &n.DownMbps, ServerName: n.ServerName, Insecure: &n.Insecure,
+			}
+			s.mergeTelemetry(&item, nodeType, n.ID, tele)
+			resp = append(resp, item)
+		}
+		return resp, nil
 	default:
 		return nil, apperror.New(apperror.CodeParamFormat, "不支持的节点类型")
+	}
+}
+
+func (s *Service) loadTelemetry(ctx context.Context, nodeType string) []model.ServerNodeTelemetry {
+	var tele []model.ServerNodeTelemetry
+	if err := s.db.WithContext(ctx).Where("node_type = ?", nodeType).Find(&tele).Error; err != nil {
+		return nil
+	}
+	return tele
+}
+
+func (s *Service) mergeTelemetry(item *dto.AdminServerNodeResp, nodeType string, nodeID int, tele []model.ServerNodeTelemetry) {
+	for _, t := range tele {
+		if t.NodeType == nodeType && t.NodeID == nodeID {
+			item.Online = t.Online
+			item.LastOnlineAt = t.LastOnlineAt
+			item.Uptime = t.Uptime
+			item.Load = t.Load
+			return
+		}
 	}
 }
 

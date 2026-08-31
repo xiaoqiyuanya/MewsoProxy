@@ -130,6 +130,37 @@ type AdminServerNodeSaveReq struct {
 	Insecure       *bool   `json:"insecure,omitempty"`
 }
 
+type AdminServerNodeResp struct {
+	ID         int    `json:"id"`
+	GroupID    string `json:"group_id"`
+	RouteID    *string `json:"route_id,omitempty"`
+	ParentID   *int   `json:"parent_id,omitempty"`
+	Tags       *string `json:"tags,omitempty"`
+	Name       string `json:"name"`
+	Rate       string `json:"rate"`
+	Host       string `json:"host"`
+	Port       string `json:"port"`
+	ServerPort int    `json:"server_port"`
+	Show       bool   `json:"show"`
+	Sort       *int   `json:"sort,omitempty"`
+	CreatedAt  int64  `json:"created_at"`
+	UpdatedAt  int64  `json:"updated_at"`
+	// 协议专属字段
+	Cipher         *string `json:"cipher,omitempty"`
+	Network        *string `json:"network,omitempty"`
+	TLS            *int8   `json:"tls,omitempty"`
+	AllowInsecure  *bool   `json:"allow_insecure,omitempty"`
+	ServerName     *string `json:"server_name,omitempty"`
+	UpMbps         *int    `json:"up_mbps,omitempty"`
+	DownMbps       *int    `json:"down_mbps,omitempty"`
+	Insecure       *bool   `json:"insecure,omitempty"`
+	// 遥测信息
+	Online       bool    `json:"online"`
+	LastOnlineAt int64   `json:"last_online_at"`
+	Uptime       int64   `json:"uptime"`
+	Load         float64 `json:"load"`
+}
+
 type AdminNodeInstallReq struct {
 	ID            int    `json:"id" binding:"required,min=1"`
 	Type          string `json:"type" binding:"required"` // trojan|vmess|shadowsocks|hysteria

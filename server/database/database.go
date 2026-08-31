@@ -39,6 +39,7 @@ func InitDB(cfg config.DatabaseConfig) (*gorm.DB, error) {
 			&model.ServerShadowsocks{},
 			&model.ServerHysteria{},
 			&model.ServerNodeSSH{},
+			&model.ServerNodeTelemetry{},
 			&model.Stat{},
 			&model.StatServer{},
 			&model.StatUser{},

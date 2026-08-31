@@ -26,3 +26,4 @@ app:
   default_group_id: 1
   subscribe_url: "http://localhost:8081"
   ssh_encrypt_key: "change-me-ssh-encrypt-key-32bytes"
+  server_token: "change-me-server-token"

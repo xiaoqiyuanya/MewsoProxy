@@ -9,6 +9,7 @@ import (
 	"mewsoproxy/server/config"
 	"mewsoproxy/server/handler/admin"
 	"mewsoproxy/server/handler/auth"
+	"mewsoproxy/server/handler/node"
 	"mewsoproxy/server/handler/order"
 	"mewsoproxy/server/handler/payment"
 	"mewsoproxy/server/handler/plan"
@@ -20,6 +21,7 @@ import (
 	adminsvc "mewsoproxy/server/service/admin"
 	authsvc "mewsoproxy/server/service/auth"
 	ordersvc "mewsoproxy/server/service/order"
+	nodesvc "mewsoproxy/server/service/node"
 	plansvc "mewsoproxy/server/service/plan"
 	subsvc "mewsoproxy/server/service/subscribe"
 	usersvc "mewsoproxy/server/service/user"
@@ -45,6 +47,9 @@ func New(cfg *config.Config, db *gorm.DB, rds *redisc.Client) *gin.Engine {
 
 	adminSvc := adminsvc.New(db, cfg, rds, orderSvc)
 	adminHandler := admin.New(adminSvc, authSvc, userSvc)
+
+	nodeSvc := nodesvc.New(db, cfg)
+	nodeHandler := node.New(nodeSvc)
 
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -77,6 +82,8 @@ func New(cfg *config.Config, db *gorm.DB, rds *redisc.Client) *gin.Engine {
 	}
 
 	api.POST("/payment/notify", paymentHandler.Notify)
+
+	api.POST("/node/report", nodeHandler.Report)
 
 	api.POST("/admin/login", adminHandler.Login)
 

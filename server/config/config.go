@@ -48,6 +48,7 @@ type AppConfig struct {
 	DefaultGroupID  int    `mapstructure:"default_group_id"`
 	SubscribeURL    string `mapstructure:"subscribe_url"`
 	SSHEncryptKey   string `mapstructure:"ssh_encrypt_key"`
+	ServerToken     string `mapstructure:"server_token"`
 }
 
 func Load() *Config {
@@ -77,6 +78,7 @@ func Load() *Config {
 	v.SetDefault("app.default_group_id", 1)
 	v.SetDefault("app.subscribe_url", "http://localhost:8081")
 	v.SetDefault("app.ssh_encrypt_key", "")
+	v.SetDefault("app.server_token", "")
 
 	if _, err := os.Stat("config.yaml"); err == nil {
 		_ = v.ReadInConfig()
@@ -94,7 +96,7 @@ func build(v *viper.Viper) *Config {
 		Database: dbCfg(v),
 		Redis:    RedisConfig{Addr: v.GetString("redis.addr"), Password: v.GetString("redis.password"), DB: v.GetInt("redis.db")},
 		JWT:      JWTConfig{AccessSecret: v.GetString("jwt.access_secret"), RefreshSecret: v.GetString("jwt.refresh_secret"), AccessTTL: v.GetString("jwt.access_ttl"), RefreshTTL: v.GetString("jwt.refresh_ttl")},
-		App:      AppConfig{RegisterEnabled: v.GetBool("app.register_enabled"), DefaultGroupID: v.GetInt("app.default_group_id"), SubscribeURL: v.GetString("app.subscribe_url"), SSHEncryptKey: v.GetString("app.ssh_encrypt_key")},
+		App:      AppConfig{RegisterEnabled: v.GetBool("app.register_enabled"), DefaultGroupID: v.GetInt("app.default_group_id"), SubscribeURL: v.GetString("app.subscribe_url"), SSHEncryptKey: v.GetString("app.ssh_encrypt_key"), ServerToken: v.GetString("app.server_token")},
 	}
 }
 

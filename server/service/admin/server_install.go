@@ -16,17 +16,19 @@ import (
 )
 
 type installNode struct {
-	id       int
-	nodeType string
-	name     string
-	serverPort int
-	cipher   string
-	network  string
-	tls      bool
-	sni      string
-	upMbps   int
-	downMbps int
-	insecure bool
+	id          int
+	nodeType    string
+	name        string
+	serverPort  int
+	cipher      string
+	network     string
+	tls         bool
+	sni         string
+	upMbps      int
+	downMbps    int
+	insecure    bool
+	reportURL   string
+	reportToken string
 }
 
 type installTask struct {
@@ -180,6 +182,8 @@ func (s *Service) runInstall(taskID string, p installPayload) {
 	}
 	defer cli.Close()
 
+	p.node.reportURL = s.cfg.App.SubscribeURL
+	p.node.reportToken = s.cfg.App.ServerToken
 	script := buildInstallScript(p.node, p.uuid)
 	cmd := fmt.Sprintf("cat > /tmp/mewso_install.sh <<'MEWSOEOF'\n%s\nMEWSOEOF\nbash /tmp/mewso_install.sh", script)
 	err = cli.RunWithLog(context.Background(), cmd, t.push)

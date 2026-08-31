@@ -141,8 +141,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, reactive, ref, computed } from 'vue';
-import { MessagePlugin } from 'tdesign-vue-next';
+import { onMounted, onUnmounted, reactive, ref, computed, h } from 'vue';
+import { MessagePlugin, Tag } from 'tdesign-vue-next';
 import {
   listGroups,
   saveGroup,
@@ -203,6 +203,7 @@ const nodeColumns = computed(() => [
   { colKey: 'server_port', title: '服务端口', width: 100 },
   { colKey: 'rate', title: '倍率', width: 80 },
   { colKey: 'show', title: '展示', cell: (_: unknown, row: ServerNode) => (row.show ? '是' : '否') },
+  { colKey: 'online', title: '状态', width: 110, cell: (_: unknown, row: ServerNode) => renderStatus(row) },
   { colKey: 'op', title: '操作', width: 200 },
 ]);
 
@@ -348,6 +349,13 @@ async function onDropNode(row: ServerNode) {
 function formatTime(v?: number): string {
   if (!v) return '-';
   return new Date(v * 1000).toLocaleString();
+}
+
+function renderStatus(row: ServerNode) {
+  if (row.online) {
+    return h(Tag, { theme: 'success', variant: 'light' }, () => '在线');
+  }
+  return h(Tag, { theme: 'default', variant: 'outline' }, () => '离线');
 }
 
 const installDialogVisible = ref(false);
